@@ -1,0 +1,30 @@
+[
+  {
+    "id": 0,
+    "categoria": "deportes",
+    "costo": 4,
+    "alcance_base": 10,
+    "duracion": 2
+  },
+  {
+    "id": 1,
+    "categoria": "moda",
+    "costo": 2,
+    "alcance_base": 4,
+    "duracion": 1
+  },
+  {
+    "id": 2,
+    "categoria": "tecnologia",
+    "costo": 3,
+    "alcance_base": 7,
+    "duracion": 2
+  },
+  {
+    "id": 3,
+    "categoria": "gaming",
+    "costo": 5,
+    "alcance_base": 12,
+    "duracion": 3
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "id": 0,
+    "nombre": "Juan",
+    "apellido": "Aguirre",
+    "intereses": ["deportes", "tecnologia", "padel"],
+    "tiempo_max": 3
+  },
+  {
+    "id": 1,
+    "nombre": "Lucia",
+    "apellido": "Fernandez",
+    "intereses": ["moda", "belleza", "tecnologia"],
+    "tiempo_max": 4
+  },
+  {
+    "id": 2,
+    "nombre": "Mateo",
+    "apellido": "Gonzalez",
+    "intereses": ["gaming", "tecnologia", "deportes"],
+    "tiempo_max": 2
+  }
+]
