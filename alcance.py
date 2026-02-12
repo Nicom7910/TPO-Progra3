@@ -6,10 +6,6 @@ from typing import List, Dict, Tuple, Optional
 NEG_INF = -10**18
 
 
-# =========================
-# Modelos (Red Social)
-# =========================
-
 @dataclass(frozen=True)
 class Usuario:
     id: int
@@ -23,36 +19,13 @@ class Usuario:
 class Anuncio:
     id: int
     categoria: str
-    costo: int               # costo por mostrar a UN usuario (impresión)
-    alcance_base: float      # alcance potencial base
-    duracion: int            # tiempo consumido en el feed
+    costo: int    # costo por mostrar a UN usuario
+    alcance_base: float    # alcance potencial base
+    duracion: int    # tiempo consumido en el feed
 
 
-# =========================
-# JSON: carga y (opcional) creación de ejemplos
-# =========================
 
-def _crear_json_ejemplo(usuarios_path: str, anuncios_path: str) -> None:
-    """Crea JSON de ejemplo si no existen (para probar rápido)."""
-    if not os.path.exists(usuarios_path):
-        usuarios_demo = [
-            {"id": 0, "nombre": "Nicolas", "apellido": "Maidana", "intereses": ["deportes", "tecnologia", "padel"], "tiempo_max": 3},
-            {"id": 1, "nombre": "Lucia", "apellido": "Fernandez", "intereses": ["moda", "belleza", "tecnologia"], "tiempo_max": 4},
-            {"id": 2, "nombre": "Mateo", "apellido": "Gonzalez", "intereses": ["gaming", "tecnologia", "deportes"], "tiempo_max": 2},
-        ]
-        with open(usuarios_path, "w", encoding="utf-8") as f:
-            json.dump(usuarios_demo, f, ensure_ascii=False, indent=2)
-
-    if not os.path.exists(anuncios_path):
-        anuncios_demo = [
-            {"id": 10, "categoria": "deportes", "costo": 4, "alcance_base": 10, "duracion": 2},
-            {"id": 20, "categoria": "moda", "costo": 2, "alcance_base": 4, "duracion": 1},
-            {"id": 30, "categoria": "tecnologia", "costo": 3, "alcance_base": 7, "duracion": 2},
-            {"id": 40, "categoria": "gaming", "costo": 5, "alcance_base": 12, "duracion": 3},
-        ]
-        with open(anuncios_path, "w", encoding="utf-8") as f:
-            json.dump(anuncios_demo, f, ensure_ascii=False, indent=2)
-
+# Carga de datos
 
 def cargar_usuarios(path: str) -> List[Usuario]:
     with open(path, "r", encoding="utf-8") as f:
@@ -89,11 +62,6 @@ def cargar_anuncios(path: str) -> List[Anuncio]:
         )
     return anuncios
 
-
-# =========================
-# Preferencias a partir del perfil (intereses)
-# =========================
-
 def generar_preferencias(
     usuarios: List[Usuario],
     anuncios: List[Anuncio],
@@ -115,63 +83,88 @@ def generar_preferencias(
     return prefs
 
 
-# =========================
-# DP por usuario (mochila 0/1 con 2 restricciones: tiempo y presupuesto)
-# =========================
-
 def _knapsack_usuario_2d(
     anuncios: List[Anuncio],
     prefs_u: List[float],
     tiempo_max: int,
     presupuesto_max: int
-) -> Tuple[List[float], List[int], List[List[float]], List[List[Optional[Tuple[int, int, int]]]]]:
+) -> Tuple[
+    List[float],
+    List[int],
+    List[List[float]],
+    List[List[Optional[Tuple[int, int, int]]]]
+]:
     """
     Para un usuario u:
       dp[t][b] = mejor valor con tiempo exacto t y presupuesto exacto b
-    valor de anuncio i para u:
+
+    Valor de anuncio i para el usuario:
       anuncios[i].alcance_base * prefs_u[i]
 
     Devuelve:
-      - best_por_b[b]: mejor valor para ese b (maximizando sobre t)
-      - best_t_por_b[b]: el t que logra best_por_b[b]
+      - best_por_b[b]: mejor valor para ese presupuesto b (maximizando sobre t)
+      - best_t_por_b[b]: el tiempo t que logra best_por_b[b]
       - dp y parent para reconstrucción
     """
+
     n = len(anuncios)
+
+    # Validación: debe haber una preferencia por cada anuncio
     if len(prefs_u) != n:
         raise ValueError("prefs_u debe tener longitud = cantidad de anuncios.")
 
     T = tiempo_max
     B = presupuesto_max
 
+    # Inicializamos dp con -infinito (estado imposible), evita combinaciones inválidas
     dp = [[NEG_INF] * (B + 1) for _ in range(T + 1)]
-    parent: List[List[Optional[Tuple[int, int, int]]]] = [[None] * (B + 1) for _ in range(T + 1)]
+
+    # parent[t][b] guarda (t_prev, b_prev, i) si se llegó tomando el anuncio i
+    parent: List[List[Optional[Tuple[int, int, int]]]] = [
+        [None] * (B + 1) for _ in range(T + 1)
+    ]
+
+    # Caso base: sin tiempo y sin presupuesto → valor 0
     dp[0][0] = 0.0
 
+    # Recorremos cada anuncio (knapsack 0/1)
     for i, ad in enumerate(anuncios):
-        c = ad.costo
-        d = ad.duracion
-        v = ad.alcance_base * prefs_u[i]
 
-        # 0/1 -> recorrer hacia atrás
+        c = ad.costo          # consumo de presupuesto
+        d = ad.duracion       # consumo de tiempo
+        v = ad.alcance_base * prefs_u[i]  # valor ponderado para este usuario
+
+        # Recorremos hacia atrás para que sea 0/1 (no reutilizar el mismo anuncio)
         for t in range(T, d - 1, -1):
             for b in range(B, c - 1, -1):
+
+                # Si el estado previo es imposible, no podemos usar este anuncio
                 if dp[t - d][b - c] == NEG_INF:
                     continue
+
+                # Candidato: tomar el anuncio i
                 cand = dp[t - d][b - c] + v
+
+                # Si mejora el valor actual, actualizamos
                 if cand > dp[t][b]:
                     dp[t][b] = cand
+                    # Guardamos desde dónde venimos y qué anuncio tomamos
                     parent[t][b] = (t - d, b - c, i)
 
+    # Para cada presupuesto b, buscamos el mejor valor maximizando sobre el tiempo
     best_por_b = [0.0] * (B + 1)
     best_t_por_b = [0] * (B + 1)
 
     for b in range(B + 1):
         mejor_val = 0.0
         mejor_t = 0
+
+        # Buscamos el mejor tiempo t para este presupuesto exacto b
         for t in range(T + 1):
             if dp[t][b] > mejor_val:
                 mejor_val = dp[t][b]
                 mejor_t = t
+
         best_por_b[b] = mejor_val
         best_t_por_b[b] = mejor_t
 
@@ -192,10 +185,6 @@ def _reconstruir(parent: List[List[Optional[Tuple[int, int, int]]]], t_fin: int,
     elegidos.reverse()
     return elegidos
 
-
-# =========================
-# DP global: repartir presupuesto total entre usuarios
-# =========================
 
 def asignar_anuncios_maximizando_alcance(
     usuarios: List[Usuario],
@@ -286,10 +275,6 @@ def asignar_anuncios_maximizando_alcance(
     return mejor_total, asignacion, presupuesto_dict
 
 
-# =========================
-# Ejecución / salida
-# =========================
-
 def imprimir_resultados(
     usuarios: List[Usuario],
     anuncios: List[Anuncio],
@@ -346,8 +331,6 @@ def imprimir_resultados(
 def main():
     usuarios_path = "usuarios.json"
     anuncios_path = "anuncios.json"
-
-    _crear_json_ejemplo(usuarios_path, anuncios_path)
 
     usuarios = cargar_usuarios(usuarios_path)
     anuncios = cargar_anuncios(anuncios_path)

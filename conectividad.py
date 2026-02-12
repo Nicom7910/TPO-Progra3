@@ -4,9 +4,6 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 
-# =========================
-# Modelos
-# =========================
 
 @dataclass(frozen=True)
 class Usuario:
@@ -22,12 +19,9 @@ class Usuario:
 class Arista:
     u: int
     v: int
-    costo: int = 1            # opcional (si no viene, peso 1)
+    costo: int = 1
 
 
-# =========================
-# JSON helpers (carga + demo opcional)
-# =========================
 
 def cargar_usuarios(path: str) -> List[Usuario]:
     with open(path, "r", encoding="utf-8") as f:
@@ -63,29 +57,6 @@ def cargar_amistades(path: str) -> List[Arista]:
         )
     return aristas
 
-
-def _crear_amistades_demo_si_no_existe(path: str) -> None:
-    """
-    Demo: crea un grafo (posiblemente no conexo) con costos opcionales.
-    """
-    if os.path.exists(path):
-        return
-
-    amistades_demo = [
-        {"u": 0, "v": 1, "costo": 3},
-        {"u": 1, "v": 2, "costo": 2},
-        {"u": 0, "v": 2, "costo": 5},
-        # componente aparte
-        {"u": 3, "v": 4, "costo": 1},
-    ]
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(amistades_demo, f, ensure_ascii=False, indent=2)
-
-
-# =========================
-# Disjoint Set Union (Union-Find) para Kruskal
-# =========================
-
 class DSU:
     def __init__(self, nodes: List[int]):
         self.parent = {x: x for x in nodes}
@@ -109,9 +80,6 @@ class DSU:
         return True
 
 
-# =========================
-# Utilidades de grafo
-# =========================
 
 def filtrar_por_campus(usuarios: List[Usuario], campus: str) -> List[Usuario]:
     return [u for u in usuarios if u.campus == campus]
@@ -148,9 +116,6 @@ def componentes_conexas(nodes: List[int], edges: List[Arista]) -> List[List[int]
     return comps
 
 
-# =========================
-# Solución principal
-# =========================
 
 def conexiones_minimas_campus(
     usuarios: List[Usuario],
@@ -243,9 +208,7 @@ def main():
     usuarios = cargar_usuarios(usuarios_path)
     amistades = cargar_amistades(amistades_path)
 
-    # Elegí el campus que quieras evaluar
     campus = "UADE"
-    # Si en tu usuarios.json agregás "campus": "CAMPUS_A", cambiás esto.
 
     selected, cost_total, comps, nuevas = conexiones_minimas_campus(
         usuarios=usuarios,
