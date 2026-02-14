@@ -1,0 +1,155 @@
+ASIGNACIÓN DE ANUNCIOS PARA MAXIMIZAR ALCANCE
+
+1) Modelaje del problema
+
+La red social se modela como:
+
+- Un conjunto de usuarios U.
+- Cada usuario u ∈ U tiene un conjunto de intereses I(u).
+- La empresa posee una cartera de intereses/anuncios K.
+- Cada interés k ∈ K está asociado a:
+    - Un nombre.
+    - Un costo fijo.
+    - Un conjunto de usuarios compatibles (usuarios que poseen ese interés).
+
+Restricción:
+- Presupuesto total P.
+
+Objetivo:
+Maximizar el alcance total, entendido como la cantidad de usuarios únicos alcanzados,
+sin superar el presupuesto disponible.
+
+
+2) Estrategia utilizada
+
+La estrategia implementada es un algoritmo Greedy por eficiencia marginal,
+con una mejora adicional para consumir el presupuesto restante mediante fracciones.
+
+Se divide en dos fases:
+
+
+ETAPA 1 — Selección Greedy (intereses enteros)
+
+- Se mantiene un conjunto Alcanzados con los usuarios ya cubiertos.
+- Mientras exista algún interés que pueda comprarse completamente sin superar el presupuesto:
+    - Para cada interés restante se calcula:
+          eficiencia = (usuarios_nuevos) / costo
+      donde:
+          usuarios_nuevos = Usuarios(interés) − Alcanzados
+    - Se selecciona el interés que maximiza dicha eficiencia.
+    - Se actualiza:
+          Alcanzados ← Alcanzados ∪ Usuarios(interés)
+          Presupuesto usado ← Presupuesto usado + costo(interés)
+
+Este proceso continúa hasta que ningún interés completo pueda entrar en el presupuesto.
+
+
+ETAPA 2 — Consumo del remanente con fracciones
+
+Si queda presupuesto remanente mayor que una tolerancia definida:
+
+- Se elige el interés restante con mayor eficiencia marginal.
+- Si entra completo, se compra entero.
+- Si no entra completo:
+    - Se calcula la fracción:
+          f = presupuesto_restante / costo(interés)
+    - Se alcanzan aproximadamente:
+          piso(f * usuarios_nuevos)
+      seleccionando un subconjunto determinístico de esos usuarios.
+    - Se consume todo el presupuesto restante.
+
+De esta forma se evita dejar presupuesto sin utilizar cuando los costos son indivisibles.
+
+
+3) Pseudocódigo
+
+Algoritmo GreedyMaxCoberturaConFracciones
+Entrada:
+    K = conjunto de intereses
+    UsuariosPorInteres
+    P = presupuesto máximo
+    tol = tolerancia
+
+Salida:
+    Alcanzados
+    PresupuestoUsado
+
+Inicio
+
+    Alcanzados ← ∅
+    Usado ← 0
+    Restantes ← K
+
+    // FASE 1: intereses enteros
+    Mientras exista i ∈ Restantes tal que Usado + costo(i) ≤ P hacer
+
+        Elegir i que maximiza:
+            |Usuarios(i) \ Alcanzados| / costo(i)
+
+        Alcanzados ← Alcanzados ∪ Usuarios(i)
+        Usado ← Usado + costo(i)
+        Quitar i de Restantes
+
+    FinMientras
+
+    R ← P − Usado
+
+    // FASE 2: fracción (opcional)
+    Si R > tol entonces
+
+        Elegir i ∈ Restantes que maximiza:
+            |Usuarios(i) \ Alcanzados| / costo(i)
+
+        Si costo(i) ≤ R entonces
+            Alcanzados ← Alcanzados ∪ Usuarios(i)
+            Usado ← Usado + costo(i)
+        Sino
+            f ← R / costo(i)
+            nuevos ← Usuarios(i) \ Alcanzados
+            k ← piso(f * |nuevos|)
+            Alcanzados ← Alcanzados ∪ SubsetDeterministico(nuevos, k)
+            Usado ← Usado + R
+        FinSi
+
+    FinSi
+
+Fin
+
+
+4) Justificación del algoritmo
+
+El problema corresponde al caso conocido como: Budgeted Maximum Coverage
+Por lo tanto, no se busca una solución exacta exhaustiva, sino una aproximación eficiente.
+La estrategia greedy selecciona en cada paso el interés con mayor rendimiento marginal (usuarios nuevos por unidad de costo).
+Esta heurística es estándar en problemas de cobertura y produce soluciones cercanas al óptimo en la práctica.
+La fase fraccional permite consumir el presupuesto restante cuando los costos son indivisibles, evitando ineficiencias.
+
+
+5) Análisis de complejidad
+
+Sea:
+
+    I = cantidad de intereses
+    U = cantidad de usuarios
+
+En cada iteración:
+
+- Se evalúan hasta I intereses.
+- Para cada interés se calcula la diferencia de conjuntos:
+      Usuarios(i) \ Alcanzados
+  lo cual puede costar O(U) en el peor caso.
+
+Como pueden realizarse hasta I iteraciones,
+la complejidad total en el peor caso es:
+
+    O(I^2 * U)
+
+En la simulación utilizada:
+
+    I = 20
+    U = 1000
+
+Por lo tanto, el algoritmo es altamente eficiente
+y ejecuta en tiempo muy bajo en la práctica.
+
+Fin del documento.

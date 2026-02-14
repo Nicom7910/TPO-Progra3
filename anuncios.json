@@ -26,5 +26,12 @@
     "costo": 5,
     "alcance_base": 12,
     "duracion": 3
+  },
+  {
+    "id": 4,
+    "categoria": "educacion",
+    "costo": 2,
+    "alcance_base": 8,
+    "duracion": 3
   }
 ]

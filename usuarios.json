@@ -3,7 +3,7 @@
     "id": 0,
     "nombre": "Juan",
     "apellido": "Aguirre",
-    "intereses": ["deportes", "tecnologia", "padel"],
+    "intereses": ["educacion", "tecnologia", "padel"],
     "tiempo_max": 3
   },
   {
