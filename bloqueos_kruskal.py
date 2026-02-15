@@ -6,23 +6,17 @@ Este script trabaja sobre el mismo dataset del TP (amistades.json, usuarios.json
 
 Idea:
 1) "Bloqueo" = eliminar una arista (u,v) del grafo de amistades.
-2) Ejecutar Kruskal (con Union-Find) sobre el grafo resultante.
+2) Ejecutar Kruskal  sobre el grafo resultante.
    - Si el bosque final tiene 1 componente => grafo conexo.
    - Si tiene k>1 componentes => NO conexo.
 3) Si NO es conexo: proponer un conjunto mínimo de nuevas conexiones (k-1)
    conectando las componentes en cadena.
 
-Criterio de selección de candidato por componente (pedido por la profesora):
+Criterio de selección de candidato por componente:
 - Luego de Kruskal, cada componente queda como un subárbol (bosque).
 - Para cada subárbol, elegimos como "candidato" un nodo que participa en la
   arista de menor costo dentro de ese subárbol (la conexión más barata del componente).
 - Si una componente no tiene aristas (nodo aislado), se toma el menor id como candidato.
-
-Notas importantes (por el dataset):
-- Con la lista actual de amistades (solo amistades existentes), no existen aristas "salientes"
-  entre componentes (si existieran, las componentes no serían distintas).
-  Por eso el criterio "arista de menor costo potencial" se interpreta como la arista de menor costo
-  dentro del subárbol resultante de Kruskal (coherente con el uso de costos del TP).
 
 Uso:
   python3 bloqueos_kruskal.py --data-dir ./TPO-Progra3-main --block-u 0 --block-v 1

@@ -1,0 +1,228 @@
+RED DE AMISTADES: MÍNIMA CONECTIVIDAD
+
+1) Modelaje del problema
+
+La red social universitaria se modela como un grafo no dirigido y ponderado:
+  G = (V, E)
+donde:
+- V es el conjunto de usuarios (cada usuario es un nodo).
+- E es el conjunto de conexiones posibles (cada conexión es una arista no dirigida).
+- Cada arista e = (u, v) tiene un costo "costo", leído desde amistades.json mediante las claves:
+    u: extremo 1 de la conexión
+    v: extremo 2 de la conexión
+    costo: peso asociado a esa conexión
+
+Objetivo:
+Determinar el conjunto mínimo de conexiones necesarias para asegurar que todos
+los usuarios del campus estén conectados entre sí, minimizando el costo total
+de las conexiones utilizadas.
+
+Resultado esperado:
+- Un Árbol de Expansión Mínima (MST) que conecta todos los nodos con exactamente
+  n-1 aristas (donde n es el número de usuarios).
+- El costo total mínimo posible para lograr conectividad completa.
+- No debe contener ciclos (es un árbol).
+
+
+2) Estrategia utilizada
+
+La estrategia implementada es el Algoritmo de Kruskal, un algoritmo Greedy clásico
+para encontrar el Árbol de Expansión Mínima (Minimum Spanning Tree - MST).
+
+El algoritmo se divide en las siguientes etapas:
+
+
+ETAPA 1 — Ordenamiento de aristas
+
+- Se cargan todas las conexiones posibles desde amistades.json.
+- Se ordenan todas las aristas por costo de menor a mayor.
+- Este ordenamiento es fundamental para la estrategia greedy: siempre intentar
+  agregar primero las conexiones más baratas.
+
+
+ETAPA 2 — Construcción del MST con Union-Find
+
+- Se utiliza la estructura Disjoint Set Union (DSU / Union-Find) para:
+    - Verificar si dos nodos están en la misma componente conexa.
+    - Unir dos componentes de forma eficiente.
+    - Detectar si agregar una arista crearía un ciclo.
+
+- Para cada arista (de menor a mayor costo):
+    - Si conecta dos componentes distintas → AGREGAR al MST.
+    - Si conecta nodos ya conectados → DESCARTAR (crearía ciclo/redundancia).
+
+- El proceso termina cuando el MST tiene exactamente n-1 aristas.
+
+
+ETAPA 3 — Verificación de conectividad
+
+- Si se logran n-1 aristas, el grafo original era conexo y el MST está completo.
+- Si no se logran n-1 aristas, existen usuarios aislados sin conexión posible
+  hacia el resto de la red.
+
+
+3) Pseudocódigo
+
+Algoritmo KruskalMST
+Entrada:
+    V = conjunto de vértices (usuarios)
+    E = conjunto de aristas (conexiones posibles con sus costos)
+
+Salida:
+    MST = conjunto de aristas del Árbol de Expansión Mínima
+    CostoTotal = costo total del MST
+
+Inicio
+
+    MST ← ∅
+    CostoTotal ← 0
+    
+    // Inicializar Union-Find
+    Para cada v ∈ V hacer
+        parent[v] ← v
+        rank[v] ← 0
+    FinPara
+    
+    // Ordenar aristas por costo ascendente
+    E_ordenadas ← Ordenar(E, por costo)
+    
+    // Construir MST
+    Para cada arista (u, v, costo) ∈ E_ordenadas hacer
+        
+        Si Find(u) ≠ Find(v) entonces
+            // No crea ciclo, agregar al MST
+            MST ← MST ∪ {(u, v, costo)}
+            CostoTotal ← CostoTotal + costo
+            Union(u, v)
+            
+            // Terminar si MST está completo
+            Si |MST| = |V| - 1 entonces
+                Retornar MST, CostoTotal
+            FinSi
+        FinSi
+        
+    FinPara
+    
+    Retornar MST, CostoTotal
+
+Fin
+
+
+Función Find(x)
+    Si parent[x] ≠ x entonces
+        parent[x] ← Find(parent[x])  // Path compression
+    FinSi
+    Retornar parent[x]
+Fin
+
+
+Función Union(a, b)
+    ra ← Find(a)
+    rb ← Find(b)
+    
+    Si ra = rb entonces
+        Retornar Falso  // Ya conectados
+    FinSi
+    
+    // Union by rank
+    Si rank[ra] < rank[rb] entonces
+        Intercambiar(ra, rb)
+    FinSi
+    
+    parent[rb] ← ra
+    
+    Si rank[ra] = rank[rb] entonces
+        rank[ra] ← rank[ra] + 1
+    FinSi
+    
+    Retornar Verdadero
+Fin
+
+
+4) Justificación del algoritmo
+
+¿Por qué Kruskal?
+
+El algoritmo de Kruskal es óptimo para encontrar el Árbol de Expansión Mínima porque:
+
+- Garantiza la solución óptima: La estrategia greedy de Kruskal está matemáticamente
+  demostrada como correcta para este problema. Siempre produce el MST con el menor
+  costo total posible.
+
+- Propiedad del corte: En cada paso, la arista de menor peso que cruza cualquier
+  corte del grafo (división en dos subconjuntos) pertenece al MST. Kruskal aprovecha
+  esta propiedad al considerar las aristas en orden de costo.
+
+- Detección eficiente de ciclos: Union-Find permite verificar en tiempo casi constante
+  si agregar una arista crearía un ciclo, evitando redundancias.
+
+
+¿Por qué Union-Find (DSU)?
+
+- Path compression: Cada operación Find() aplana el árbol, haciendo que futuras
+  búsquedas sean más rápidas.
+
+- Union by rank: Al unir componentes, el árbol más pequeño se une al más grande,
+  manteniendo la estructura balanceada.
+
+- Eficiencia: Ambas optimizaciones garantizan que las operaciones sean prácticamente
+  O(1) amortizado, lo que hace al algoritmo muy eficiente.
+
+
+Propiedades del MST resultante:
+
+- Conectividad total: Todos los usuarios quedan conectados (si el grafo original
+  era conexo).
+- Minimalidad: El costo total es el mínimo posible.
+- Sin redundancia: Exactamente n-1 aristas, sin ciclos.
+- Unicidad: Si todos los costos son distintos, el MST es único.
+
+
+5) Análisis de complejidad
+
+Sea:
+    V = número de vértices (usuarios)
+    E = número de aristas (conexiones posibles)
+
+Ordenamiento de aristas:
+    O(E log E)
+
+Operaciones Union-Find:
+    O(E α(V))
+    donde α es la función inversa de Ackermann, que crece extremadamente lento
+    y es prácticamente constante para cualquier valor realista de V.
+
+Complejidad total:
+    O(E log E)
+
+Dado que E ≤ V², esto equivale a:
+    O(E log V)
+
+En la práctica, el algoritmo es muy eficiente y escala bien para grafos
+de tamaño mediano a grande.
+
+
+6) Formato de datos
+
+El algoritmo espera los siguientes archivos JSON:
+
+usuarios.json:
+[
+    {"id": 0, "nombre": "Juan", "apellido": "Pérez", ...},
+    {"id": 1, "nombre": "María", "apellido": "García", ...},
+    ...
+]
+
+amistades.json:
+[
+    {"u": 0, "v": 1, "costo": 5},
+    {"u": 0, "v": 2, "costo": 8},
+    {"u": 1, "v": 2, "costo": 3},
+    ...
+]
+
+Donde cada entrada en amistades.json representa una conexión posible entre
+dos usuarios con su costo asociado.
+
+
+Fin del documento.

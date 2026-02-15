@@ -1,0 +1,273 @@
+SIMULACIÓN DE BLOQUEOS Y CONEXIONES ALTERNATIVAS (Kruskal)
+
+1) Modelaje del problema y subproblemas
+
+El punto de partida es el mismo grafo de amistades del TP:
+  G = (V, E)
+
+- V: conjunto de usuarios (cada usuario es un vértice identificado por su id).
+- E: conjunto de amistades (aristas no dirigidas con un costo entero).
+  Cada arista e = (u, v) se lee de amistades.json con las claves:
+      u: extremo 1
+      v: extremo 2
+      costo: peso de la conexión
+
+Sobre este grafo base se define el concepto de "bloqueo":
+- Un bloqueo (u, v) = eliminación de todas las aristas no dirigidas que unen a u y v.
+
+A partir de este escenario, el script bloqueos_kruskal.py resuelve, de manera
+modular, los siguientes subproblemas:
+
+Subproblema A — Carga del grafo y aplicación del bloqueo
+
+Modelado:
+- Lectura de usuarios desde usuarios.json → diccionario id → datos.
+- Lectura de amistades desde amistades.json → lista de Edge(u, v, cost).
+- Cálculo del número de vértices n = max(id observado) + 1.
+- Normalización del par (u, v) como (min(u, v), max(u, v)) para modelar la
+  arista como no dirigida.
+- Función apply_block: recorre la lista de aristas y descarta todas las que
+  tienen como extremos el par bloqueado.
+
+Objetivo:
+- Obtener una nueva lista de aristas E' = E \ {(u, v)} que representa la red
+  luego del bloqueo.
+
+
+Subproblema B — Detección de componentes tras el bloqueo (bosque de Kruskal)
+
+Modelado:
+- Se ejecuta Kruskal sobre el grafo (V, E') para obtener un bosque de
+  expansión mínima (una ARM por componente conexa).
+- Se usa una estructura Union-Find (DSU) para representar las componentes.
+- A partir del DSU se construye un mapa de componentes: root → [nodos].
+
+Objetivo:
+- Determinar si la red sigue siendo conexa después del bloqueo.
+- Identificar cuántas componentes k existen y qué vértices pertenecen a cada una.
+
+
+Subproblema C — Elección de un "candidato" por componente
+
+Modelado:
+- Para cada componente (subárbol del bosque de Kruskal) se elige un nodo
+  representativo o candidato.
+- Regla aplicada:
+  - Si la componente tiene al menos una arista en el bosque, se busca la arista
+    de menor costo dentro de esa componente; como candidato se toma el extremo
+    más pequeño (min(u, v)) de esa arista de costo mínimo.
+  - Si la componente no tiene aristas (nodo aislado), el candidato es el
+    vértice de menor id dentro de la componente.
+
+Objetivo:
+- Resumir cada componente en un único nodo representante para simplificar la
+  propuesta de reconexión entre componentes.
+
+
+Subproblema D — Propuesta de nuevas conexiones mínimas (k − 1 aristas)
+
+Modelado:
+- Si el grafo resultante tiene k > 1 componentes, se propone un conjunto
+  mínimo de nuevas conexiones que garantice volver a conectar la red.
+- Estrategia simple: conectar las k componentes en cadena.
+  - Se toman los roots de las componentes en orden determinista.
+  - Para cada par consecutivo de componentes Ci, Ci+1 se conecta:
+        (candidato(Ci), candidato(Ci+1))
+  - Si ambos candidatos coincidieran (caso muy raro), se busca dentro de la
+    segunda componente un nodo alternativo.
+
+Objetivo:
+- Generar exactamente k − 1 nuevas aristas que aseguren la conectividad global
+  de la red, sin añadir más conexiones de las necesarias a nivel de componentes.
+
+
+Subproblema E — Validación de la reconexión propuesta
+
+Modelado:
+- Se crea un nuevo DSU y se unen:
+  - Todas las aristas del grafo bloqueado E'.
+  - Todas las conexiones nuevas propuestas entre componentes.
+- Se verifica el número final de componentes en el DSU.
+
+Objetivo:
+- Confirmar que, agregando las conexiones sugeridas, la red completa queda en
+  una sola componente conexa.
+
+
+2) Estrategias algorítmicas aplicadas
+
+Subproblema A — Filtrado de aristas por bloqueo (apply_block)
+
+Estrategia:
+- Recorrido lineal sobre la lista de aristas.
+- Para cada Edge(u, v, cost) se compara el par normalizado con el par
+  bloqueado; si coinciden, se elimina; en caso contrario, se conserva.
+
+Justificación:
+- Es la forma más directa y clara de implementar una operación de "borrado" en
+  una lista de aristas sin estructuras adicionales.
+- No requiere ordenar ni reestructurar el grafo; simplemente devuelve una
+  nueva lista con las aristas permitidas.
+
+
+Subproblema B — Kruskal para construir un bosque y detectar componentes
+
+Estrategia:
+- Se aplica el Algoritmo de Kruskal sobre E' (mismas ideas que en la red
+  mínima):
+  - Ordenar las aristas por costo ascendente.
+  - Recorrerlas y, para cada una, usar DSU.union(u, v) para decidir si se
+    agrega al bosque (si conecta componentes distintas).
+- El DSU mantiene implícitamente las componentes conexas actuales.
+- Luego se recorre [0..n-1] y se consulta dsu.find(v) para agrupar nodos en
+  componentes.
+
+Justificación:
+- Kruskal es adecuado no solo para obtener un ARM global, sino también para
+  obtener un bosque de ARM cuando el grafo no es conexo.
+- El uso de DSU garantiza operaciones
+  prácticamente O(1) amortizado.
+- Permite, de manera natural, saber cuántas componentes quedan luego del
+  bloqueo y cómo están formadas.
+
+
+Subproblema C — Selección de candidatos por arista mínima
+
+Estrategia:
+- Inicialmente se define como candidato de cada componente el nodo de menor id
+  (fallback determinista).
+- Luego se recorre la lista de aristas del bosque (armas seleccionadas por
+  Kruskal):
+  - Para cada arista (u, v, cost), se identifica su componente root.
+  - Si cost es menor que el mejor costo registrado para esa componente, se
+    actualiza el candidato como min(u, v).
+
+Justificación:
+- Seleccionar el extremo de la arista más barata tiene sentido intuitivo: es
+  un vértice que ya participa en la conexión más económica dentro de su
+  componente.
+- El criterio del mínimo id asegura determinismo cuando hay empates y cuando
+  la componente no tiene aristas.
+- El algoritmo es lineal en el número de aristas del bosque y no requiere
+  estructuras sofisticadas.
+
+
+Subproblema D — Reconexión mínima entre componentes
+
+Estrategia:
+- Con k componentes y un candidato por cada una, se construye una cadena de
+  conexiones entre candidatos consecutivos:
+    (c1, c2), (c2, c3), ..., (c(k-1), ck)
+- Esto genera exactamente k − 1 nuevas aristas, lo mínimo necesario para
+  conectar k componentes entre sí.
+
+Justificación:
+- Es la solución más simple que garantiza conectividad a nivel de componentes.
+- No se intenta optimizar el costo de estas nuevas conexiones (no hay
+  información de costos en las aristas sugeridas), pero sí se respeta la
+  minimalidad en la cantidad de nuevas conexiones.
+- La elección determinista de candidatos asegura reproducibilidad en las
+  propuestas.
+
+
+Subproblema E — Verificación de conectividad final
+
+Estrategia:
+- Se crea un nuevo DSU sobre n nodos.
+- Se unen todas las aristas de E' y luego todas las aristas nuevas
+  propuestas.
+- Se comprueba el contador de componentes del DSU (components == 1).
+
+Justificación:
+- Es una verificación directa, usando la misma estructura que se emplea en
+  Kruskal, sin introducir nuevas estructuras.
+- Permite confirmar formalmente que la propuesta de reconexión es suficiente.
+
+
+3) Complejidad temporal y espacial
+
+Sea:
+    V = número de vértices (usuarios)
+    E = número de aristas originales (amistades)
+    E' = número de aristas luego del bloqueo (E' ≤ E)
+    k = número de componentes después del bloqueo
+
+Subproblema A — apply_block
+
+- Tiempo: se recorre la lista completa de aristas una sola vez.
+  Complejidad O(E).
+- Espacio adicional: se construye una nueva lista de aristas del mismo orden
+  que la original.
+  Complejidad O(E) espacio extra.
+
+
+Subproblema B — Kruskal sobre E'
+
+- Ordenamiento de aristas: O(E' log E').
+
+Complejidad temporal dominante:
+    O(E' log E')  (≈ O(E log E) en el peor caso)
+
+- Espacio:
+  - DSU: arrays parent y rank de tamaño O(V).
+  - Lista de aristas del bosque (forest_edges): a lo sumo V − 1 aristas.
+  - Mapa de componentes: cada vértice aparece exactamente en una lista.
+
+  Espacio total: O(V + E').
+
+
+Subproblema C — Selección de candidatos
+
+- Recorrido de todas las componentes y de todas las aristas del bosque.
+- Sea F el número de aristas del bosque (F ≤ V − 1):
+  - Construcción del diccionario de candidatos por fallback: O(k).
+  - Mapeo nodo → root: O(V).
+  - Recorrido de forest_edges para actualizar candidatos: O(F).
+
+Complejidad temporal:
+    O(V + F)  ⊆  O(V)
+
+Espacio adicional:
+- Diccionarios candidate[root], best_cost[root] y node_to_root: O(V).
+
+
+Subproblema D — Propuesta de k − 1 nuevas conexiones
+
+- Se recorre la lista ordenada de roots y se generan k − 1 pares.
+- En el caso extremo donde haya que buscar un alternativo en la segunda
+  componente (cuando ambos candidatos coinciden), se recorre la lista de
+  nodos de esa componente, que en total suma O(V) sobre todas las
+  componentes.
+
+Complejidad temporal:
+    O(k + V)  ⊆  O(V)
+
+Espacio adicional:
+- Lista de nuevas aristas sugeridas: tamaño k − 1 → O(k).
+
+
+Subproblema E — Verificación de conectividad final
+
+- Se inicializa un nuevo DSU de tamaño V: O(V).
+- Se procesan todas las aristas de E' (al menos) y luego las k − 1 nuevas:
+  total ≈ E' + (k − 1).
+- Cada unión es O(α(V)) amortizado.
+
+Complejidad temporal:
+    O((E' + k) · α(V))  ≈  O(E')
+
+Espacio adicional:
+- DSU auxiliar: O(V).
+
+
+Complejidad global del enfoque
+
+La parte dominante es el ordenamiento de aristas en el subproblema B (Kruskal):
+
+    Tiempo total ≈ O(E' log E')
+    Espacio total ≈ O(V + E')
+
+Dado que E' ≤ E y que, en este contexto, el número de usuarios y amistades es
+moderado, el algoritmo es muy eficiente en la práctica. Además, todas las
+estructuras utilizadas (listas, diccionarios, DSU) son de tamaño lineal en V y E,
+por lo que el consumo de memoria es acotado y manejable.
