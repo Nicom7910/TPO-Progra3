@@ -19,5 +19,124 @@
     "apellido": "Gonzalez",
     "intereses": ["gaming", "tecnologia", "deportes"],
     "tiempo_max": 2
+  },
+  {
+    "id": 3,
+    "nombre": "Sofia",
+    "apellido": "Lopez",
+    "intereses": ["moda", "belleza", "viajes"],
+    "tiempo_max": 3
+  },
+  {
+    "id": 4,
+    "nombre": "Martin",
+    "apellido": "Rodriguez",
+    "intereses": ["deportes", "tecnologia", "gaming"],
+    "tiempo_max": 5
+  },
+  {
+    "id": 5,
+    "nombre": "Camila",
+    "apellido": "Sanchez",
+    "intereses": ["educacion", "moda", "belleza"],
+    "tiempo_max": 2
+  },
+  {
+    "id": 6,
+    "nombre": "Lucas",
+    "apellido": "Perez",
+    "intereses": ["tecnologia", "gaming", "deportes"],
+    "tiempo_max": 4
+  },
+  {
+    "id": 7,
+    "nombre": "Valentina",
+    "apellido": "Diaz",
+    "intereses": ["viajes", "moda", "belleza"],
+    "tiempo_max": 3
+  },
+  {
+    "id": 8,
+    "nombre": "Nicolas",
+    "apellido": "Romero",
+    "intereses": ["deportes", "padel", "tecnologia"],
+    "tiempo_max": 2
+  },
+  {
+    "id": 9,
+    "nombre": "Florencia",
+    "apellido": "Ruiz",
+    "intereses": ["educacion", "viajes", "moda"],
+    "tiempo_max": 4
+  },
+  {
+    "id": 10,
+    "nombre": "Diego",
+    "apellido": "Alvarez",
+    "intereses": ["gaming", "tecnologia", "deportes"],
+    "tiempo_max": 3
+  },
+  {
+    "id": 11,
+    "nombre": "Julieta",
+    "apellido": "Torres",
+    "intereses": ["belleza", "moda", "tecnologia"],
+    "tiempo_max": 5
+  },
+  {
+    "id": 12,
+    "nombre": "Franco",
+    "apellido": "Mansilla",
+    "intereses": ["deportes", "gaming", "padel"],
+    "tiempo_max": 2
+  },
+  {
+    "id": 13,
+    "nombre": "Agustina",
+    "apellido": "Castro",
+    "intereses": ["educacion", "viajes", "belleza"],
+    "tiempo_max": 3
+  },
+  {
+    "id": 14,
+    "nombre": "Bruno",
+    "apellido": "Vega",
+    "intereses": ["tecnologia", "deportes", "gaming"],
+    "tiempo_max": 4
+  },
+  {
+    "id": 15,
+    "nombre": "Martina",
+    "apellido": "Martinez",
+    "intereses": ["moda", "belleza", "viajes"],
+    "tiempo_max": 2
+  },
+  {
+    "id": 16,
+    "nombre": "Facundo",
+    "apellido": "Benitez",
+    "intereses": ["deportes", "padel", "tecnologia"],
+    "tiempo_max": 3
+  },
+  {
+    "id": 17,
+    "nombre": "Paula",
+    "apellido": "Navarro",
+    "intereses": ["educacion", "moda", "belleza"],
+    "tiempo_max": 4
+  },
+  {
+    "id": 18,
+    "nombre": "Tomas",
+    "apellido": "Herrera",
+    "intereses": ["gaming", "tecnologia", "deportes"],
+    "tiempo_max": 3
+  },
+  {
+    "id": 19,
+    "nombre": "Carolina",
+    "apellido": "Mendez",
+    "intereses": ["viajes", "moda", "belleza"],
+    "tiempo_max": 5
   }
 ]
