@@ -222,7 +222,7 @@ amistades.json:
 ]
 
 Donde cada entrada en amistades.json representa una conexión posible entre
-dos usuarios con su costo asociado.
+ dos usuarios con su costo asociado.
 
 
 Fin del documento.

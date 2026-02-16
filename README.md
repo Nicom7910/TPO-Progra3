@@ -23,31 +23,30 @@ El menú presenta las siguientes opciones:
 
 ## Estructura de archivos
 
-### Código fuente
+### Código fuente principal
 
 - `main.py` - Menú principal que integra todos los ejercicios
-- `alcance_vfinal.py` - Algoritmo greedy para maximizar cobertura de usuarios
-- `red_minima_kruskal.py` - Algoritmo de Kruskal para MST
-- `bloqueos_kruskal.py` - Simulación de bloqueos y reconexión
+
+### Ejercicios
+
+- Carpeta `EJ_2/`
+	- `EJ_2/alcance_vfinal.py` - Algoritmo greedy para maximizar la cobertura de usuarios (Asignación de Publicidad)
+	- `EJ_2/Informe_Asignacion_Alcance.txt` - Informe teórico del ejercicio de publicidad
+
+- Carpeta `EJ_3/`
+	- `EJ_3/red_minima_kruskal.py` - Algoritmo de Kruskal para obtener el Árbol de Expansión Mínima (Red de Amistades)
+	- `EJ_3/Informe_Red_Minima_Kruskal.txt` - Informe teórico del ejercicio de conectividad mínima
+
+- Carpeta `EJ_1_Opcional/`
+	- `EJ_1_Opcional/bloqueos_kruskal.py` - Simulación de bloqueos y propuesta de reconexiones mínimas
+	- `EJ_1_Opcional/Informe_Bloqueos_Kruskal.txt` - Informe teórico del ejercicio opcional de bloqueos
 
 ### Datos de entrada
 
 - `usuarios.json` - Lista de usuarios del campus
 - `amistades.json` - Conexiones posibles entre usuarios con sus costos
 
-### Documentación
-
-- `Informe_Asignacion_Alcance.txt` - Informe del ejercicio de publicidad
-- `Informe_Red_Minima_Kruskal.txt` - Informe del ejercicio de conectividad mínima
-- `bloqueos.txt` - Informe del ejercicio de bloqueos
-
 ## Requisitos
 
 - Python 3.7 o superior
 - No requiere dependencias externas
-
-## Algoritmos implementados
-
-1. **Greedy por eficiencia marginal** - Para maximización de cobertura con presupuesto
-2. **Kruskal con Union-Find (DSU)** - Para árbol de expansión mínima
-3. **Detección de componentes conexas** - Para análisis de bloqueos y reconexión

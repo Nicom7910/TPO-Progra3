@@ -59,7 +59,7 @@ def run_alcance():
     print()
     
     try:
-        from alcance_vfinal import simular_red_social, indexar_usuarios_por_interes, greedy_max_cobertura_con_fracciones
+        from EJ_2.alcance_vfinal import simular_red_social, indexar_usuarios_por_interes, greedy_max_cobertura_con_fracciones
         
         try:
             presupuesto = input("Presupuesto máximo (default=300): ").strip()
@@ -86,7 +86,7 @@ def run_red_minima():
     print()
     
     try:
-        from red_minima_kruskal import run
+        from EJ_3.red_minima_kruskal import run
         data_dir = Path(".")
         
         modo = input("¿Modo detallado? (s/n, default=s): ").strip().lower()
@@ -111,7 +111,7 @@ def run_bloqueos():
     print()
     
     try:
-        from bloqueos_kruskal import run
+        from EJ_1_Opcional.bloqueos_kruskal import run
         data_dir = Path(".")
         
         print("Ingresa los IDs de los usuarios a bloquear:")

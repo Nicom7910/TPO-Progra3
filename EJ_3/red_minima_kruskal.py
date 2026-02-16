@@ -133,15 +133,6 @@ def kruskal_mst(n: int, edges: List[Edge], users: Dict[int, dict], verbose: bool
        - Si conecta dos componentes distintas → AGREGAR al MST
        - Si conecta nodos ya conectados → DESCARTAR (crearía ciclo)
     3. Terminar cuando tengamos n-1 aristas (árbol completo)
-    
-    Args:
-        n: Número de vértices
-        edges: Lista de todas las conexiones posibles
-        users: Diccionario de usuarios para mostrar nombres
-        verbose: Si True, muestra el proceso paso a paso
-    
-    Returns:
-        (mst_edges, costo_total): Aristas del MST y su costo total
     """
     dsu = DSU(n)
     mst: List[Edge] = []

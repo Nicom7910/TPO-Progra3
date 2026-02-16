@@ -271,3 +271,5 @@ Dado que E' ≤ E y que, en este contexto, el número de usuarios y amistades es
 moderado, el algoritmo es muy eficiente en la práctica. Además, todas las
 estructuras utilizadas (listas, diccionarios, DSU) son de tamaño lineal en V y E,
 por lo que el consumo de memoria es acotado y manejable.
+
+Fin del documento.

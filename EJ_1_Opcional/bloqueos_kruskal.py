@@ -42,16 +42,6 @@ Formato de datos (JSON)
         ...
     ]
     Nota: (u,v) se interpreta como arista no dirigida; el bloqueo elimina todas las ocurrencias del par.
-
-Resumen del algoritmo
-1) Cargar datos (usuarios y amistades) y determinar n (cantidad de nodos por id máximo + 1).
-2) Elegir bloqueo (u,v) y eliminar todas sus ocurrencias del conjunto de aristas.
-3) Ejecutar Kruskal con DSU para construir un bosque (ARM por componente) y obtener las componentes.
-4) Si k == 1 → conexo; si k > 1 → no conexo.
-5) Elegir un candidato por componente: nodo que participa en la arista de menor costo del subárbol;
-     si no hay aristas, usar el menor id.
-6) Proponer k−1 nuevas conexiones conectando candidatos consecutivos (cadena de componentes).
-7) Validar: unir las aristas propuestas y verificar que el grafo quede conexo (components == 1).
 """
 from __future__ import annotations
 
